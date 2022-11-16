@@ -3,72 +3,79 @@
 /*                                                        :::      ::::::::   */
 /*   ft_printf_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ahallali <ahallali@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ahallali <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/14 18:02:28 by ahallali          #+#    #+#             */
-/*   Updated: 2022/11/14 18:32:22 by ahallali         ###   ########.fr       */
+/*   Updated: 2022/11/16 15:23:23 by ahallali         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include"ft_printf.h"
-#define UPBASE "0123456789ABCDEF"
-#define LWBASE "0123456789abcdef"
+#include "libftprintf.h"
 
-void ft_putchar (char c)
+
+void ft_putchar (char c,int *len)
 {
-    write (1,&c,1);
+	*len += write (1,&c,1);
 }
 
 size_t	ft_strlen(const char *s)
 {
 	size_t	i;
-
 	i = 0;
+	if (s[i] =='\0')
+		return (0);
 	while (s[i])
 		i++;
 	return (i);
 }
 
-int  ft_putstr (char * s)
+void  ft_putstr (char *s,int *len)
 {
-    if (s)
-        	return (write(1, s, ft_strlen(s)));
-    return (0);
-        
+	if (s==NULL)
+		*len +=write (1,"(null)",6);
+   	if (s)
+        	*len += write(1, s, ft_strlen(s));
 }
 
-void	ft_putnbr(int n)
+void	ft_putnbr(int n,int *len)
 {
 	long long	num;
 
 	num = n;
 	if (num < 0)
 	{
-		ft_putchar('-');
+		ft_putchar('-',len);
 		num *= -1;
 	}
 	if (num > 9)
-		ft_putnbr(num / 10);
-	ft_putchar((num % 10) + '0');
+		ft_putnbr(num / 10,len);
+	ft_putchar((num % 10) + '0', len);
 }
 
-void	ft_puthexa(unsigned int n, char *base)
+
+void	ft_puthexa(unsigned int n,int *len, char b)
 {
-	long long	num;
-
-	num = n;
-	// if (num < 0)
-	// {
-	// 	ft_putchar('-');
-	// 	num *= -1;
-	// }
-    
+	unsigned long 	num;
+	char *base;
+	num=n;
+	base = LWBASE;
+	if (b == 'X')
+		base = UPBASE;
 	if (num > 15)
-		ft_puthexa(num / 16, base);
-	ft_putchar(base[num % 16]);
+		ft_puthexa(num / 16,len,b );
+	ft_putchar(base[num % 16],len);
+}
+void	ft_putadr( unsigned long n,int *len, char b)
+{
+	char *base;
+	if (n > 15)
+		// ft_puthexa(num % 16,len,b);
+		ft_puthexa(n / 16,len,b);
+	ft_putchar(base[n%16],len);
 }
 
-int main(){
-    printf("%X\n",-4851448);
-    ft_puthexa(-4851448,UPBASE);
+void ft_putpointer(unsigned long p, int *len)
+{	
+	ft_putstr("0x",len);
+	ft_putadr((unsigned long )p, len, 'x');
 }
